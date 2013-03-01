@@ -1,1 +1,236 @@
-<h1>Index View</h1>
+<style>
+h1, h2 {
+	margin: 0 10px;
+}
+
+#panel {
+	float: left;
+	margin-left: 10px;
+	background: #eee;
+	padding: 10px;
+}
+
+table {
+	border-collapse: collapse;
+	display: block;
+	float: left;
+	margin: 0 10px 20px;
+}
+
+table thead tr {
+		cursor: pointer;
+}
+
+table td, table th {
+	padding: 10px;
+	background: #ddd;
+	text-align: left;
+}
+
+table tr:nth-child(odd) td {
+	background: #f0f0f0;
+}
+
+table th {
+		background: #aaa;
+}
+
+.linkLook {
+	text-decoration: underline;
+	cursor: pointer;
+	color: #00c;
+}
+
+.collapse-height {
+	visibility: hidden;
+}
+
+.info {
+	margin: 10px 10px 20px;
+	padding: 10px;
+	border: 1px solid #5a5;
+	background: #afa;
+}
+
+.info b {
+	padding-left: 42px;
+}
+
+.info b:first-child {
+	padding-left: 0;
+}
+</style>
+
+<script>
+$(function(){
+
+	var currentUser = null;
+
+	// ------------------------------------------------------------
+	//
+	// ------------------------------------------------------------
+	(function init() {
+		<?php $randKey = rand(0, count($this->users) - 1); ?>
+		currentUser = <?= $this->users[$randKey]["id"]; ?>;
+		$("#currentUser").text("<?= $this->users[$randKey]["username"]; ?>");
+
+		getUserInfo();
+	})();
+
+	// ------------------------------------------------------------
+	//
+	// ------------------------------------------------------------
+	$("thead").on("click", function(){
+		$(this).next().toggleClass("collapse-height");
+	});
+
+	// ------------------------------------------------------------
+	//
+	// ------------------------------------------------------------
+	$("[data-user]").on("click", function(){
+		currentUser = $(this).attr("data-user");
+		$("#currentUser").text($(this).text());
+
+		getUserInfo();
+	});
+
+	// ------------------------------------------------------------
+	//
+	// ------------------------------------------------------------
+	function getUserInfo() {
+
+		// XHR get user summary
+		// ...
+		
+		// ------------------------------------------------------------
+		//
+		// ------------------------------------------------------------
+		function onHasSummary() {
+
+			var tmpl = $("#user_summary_tmpl").html();
+			var data = {
+					username : $("#currentUser").text(),
+					total_read : 23,
+					articles : [{title:"fake title 1"}, {title: "fake title 2"}]
+			};
+
+			var html = Mustache.to_html(tmpl, data);
+
+			$("#panelContent").html(html);
+		}
+
+		// XHR get recommendations
+		// ...
+
+		// ------------------------------------------------------------
+		//
+		// ------------------------------------------------------------
+		function onHasRecommendations() {
+			var tmpl = $("#recommendations_tmpl").html();
+		}
+
+
+		onHasSummary();
+		onHasRecommendations();
+	}
+
+	// ------------------------------------------------------------
+	//
+	// ------------------------------------------------------------
+	$("[data-article]").on("click", function(){
+		var article_id = $(this).attr("id");
+		var user_id = currentUser;
+		var date = new Date();
+
+		// Send beacon to save info
+	});
+});
+</script>
+
+<script type="mustache-x/template" id="user_summary_tmpl">
+<p>User: {{username}}</p>
+<p>Articles read: {{total_read}}</p>
+<ul>
+	{{#articles}}
+	<li>{{title}}</li>
+	{{/articles}}
+</ul>
+</script>
+
+<script type="mustache-x/template" id="recommendations_tmpl">
+<p>User: {{username}}</p>
+<ul>
+	{{#articles}}
+	<li>{{title}}</li>
+	{{/articles}}
+</ul>
+</script>
+
+<h1>Current User: <span id="currentUser"></span></h1>
+
+<p class="info">
+<b>1.</b> Click username to make user active 
+<b>2.</b> Click article title to register article as read by user
+</p>
+
+<table>
+	<thead>
+		<tr>
+			<th>Username</th>
+		</tr>
+	</thead>
+	<tbody>
+		<?php foreach ($this->users as $user): ?>
+		<tr>
+			<td class="linkLook" data-user="<?= $user["id"]; ?>"><?= $user["username"]; ?></td>
+		</tr>
+		<?php endforeach; ?>
+	</tbody>
+</table>
+
+<table>
+	<thead>
+		<tr>
+			<th>Attributes</th>
+			<th>Articles</th>
+		</tr>
+	</thead>
+	<tbody>
+		<?php foreach ($this->attributes as $attribute): ?>
+		<tr>
+			<td class="linkLook" data-attributeToMostPopular="<?= $attribute["attribute_id"]; ?>"><?= $attribute["attribute_title"] ?></td>
+			<td><?= $attribute["total_articles"]; ?></td>
+		</tr>
+		<?php endforeach; ?>
+	</tbody>
+</table>
+
+<table>
+	<thead>
+		<tr>
+			<th>Article</th>
+			<th>Attributes</th>
+		</tr>
+	</thead>
+	<tbody>
+		<?php $currentTitle = 0; ?>
+		<?php foreach ($this->articles as $article): ?>
+		<tr>
+			<?php if ($currentTitle == $article["article_id"]): ?>
+			<td></td>
+			<?php else: ?>
+			<td class="linkLook" data-article="<?= $article["article_id"]; ?>"><?= $article["article_title"]; ?></td>
+			<?php $currentTitle = $article["article_id"]; ?>
+			<?php endif; ?>
+			<td class="linkLook" data-attribute="<?= $article["attribute_id"]; ?>"><?= $article["attribute_title"] ?></td>
+		</tr>
+		<?php endforeach; ?>
+	</tbody>
+</table>
+
+<div id="panel">
+	<h2>User Summary</h2>
+	<div id="panelContent"></div>
+	<hr/>
+	<div id="recommendationsPanel"></div>
+</div>
