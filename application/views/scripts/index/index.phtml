@@ -99,19 +99,20 @@ $(function(){
 	// ------------------------------------------------------------
 	function getUserInfo() {
 
-		// XHR get user summary
-		// ...
-		
+		var id = currentUser;
+
+		$.getJSON("/index/get-user-summary/saui/" + id, onHasSummary);
+
 		// ------------------------------------------------------------
 		//
 		// ------------------------------------------------------------
-		function onHasSummary() {
+		function onHasSummary(response) {
 
 			var tmpl = $("#user_summary_tmpl").html();
 			var data = {
 					username : $("#currentUser").text(),
-					total_read : 23,
-					articles : [{title:"fake title 1"}, {title: "fake title 2"}]
+					total_read : response["total_articles"],
+					articles : response["articles"]
 			};
 
 			var html = Mustache.to_html(tmpl, data);
@@ -119,35 +120,46 @@ $(function(){
 			$("#panelContent").html(html);
 		}
 
-		// XHR get recommendations
-		// ...
+		$.getJSON("/index/get-user-recommendations/saui/" + id, onHasRecommendations);
 
 		// ------------------------------------------------------------
 		//
 		// ------------------------------------------------------------
-		function onHasRecommendations() {
+		function onHasRecommendations(response) {
 			var tmpl = $("#recommendations_tmpl").html();
+			var data = {
+					username : $("#currentUser").text(),
+					articles : response["articles"]
+			};
+
+			var html = Mustache.to_html(tmpl, data);
+
+			$("#recommendationsPanel").html(html);
 		}
-
-
-		onHasSummary();
-		onHasRecommendations();
 	}
 
 	// ------------------------------------------------------------
 	//
 	// ------------------------------------------------------------
 	$("[data-article]").on("click", function(){
-		var article_id = $(this).attr("id");
+		var article_id = $(this).attr("data-article");
 		var user_id = currentUser;
 		var date = new Date();
+		var year = date.getUTCFullYear();
+		var month = date.getUTCMonth() + 1;
+		var day = date.getUTCDate();
+		var time = date.toString().match(/\d{2}:\d{2}:\d{2}/)[0];
 
-		// Send beacon to save info
+		var beacon = new Image();
+		beacon.src = "http://simple-analytics.dev/index/send-beacon/?saai=" + article_id 
+				+ "&saui=" + user_id 
+				+ "&said=" + year + "-" + (month < 10 ? "0" + month : month) + "-" + (day < 10 ? "0" + day : day) + " " + time;
 	});
 });
 </script>
 
 <script type="mustache-x/template" id="user_summary_tmpl">
+<h2>User Summary</h2>
 <p>User: {{username}}</p>
 <p>Articles read: {{total_read}}</p>
 <ul>
@@ -158,6 +170,7 @@ $(function(){
 </script>
 
 <script type="mustache-x/template" id="recommendations_tmpl">
+<h2>User Recommendations</h2>
 <p>User: {{username}}</p>
 <ul>
 	{{#articles}}
@@ -229,7 +242,6 @@ $(function(){
 </table>
 
 <div id="panel">
-	<h2>User Summary</h2>
 	<div id="panelContent"></div>
 	<hr/>
 	<div id="recommendationsPanel"></div>

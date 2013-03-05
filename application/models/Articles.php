@@ -1,7 +1,7 @@
 <?php 
 class Application_Model_Articles {
 	private $db;
-	
+
 	// ------------------------------------------------------------
 	//
 	// ------------------------------------------------------------
@@ -26,7 +26,7 @@ class Application_Model_Articles {
 				->order(array("Article.title", "Attribute.title"))
 			);
 	}
-	
+
 	public function getAttributeSummary() {
 		return $this->db->fetchAll(
 				$this->db->select()
