@@ -151,7 +151,7 @@ $(function(){
 		var time = date.toString().match(/\d{2}:\d{2}:\d{2}/)[0];
 
 		var beacon = new Image();
-		beacon.src = "http://simple-analytics.dev/index/send-beacon/?saai=" + article_id 
+		beacon.src = "/index/send-beacon/?saai=" + article_id 
 				+ "&saui=" + user_id 
 				+ "&said=" + year + "-" + (month < 10 ? "0" + month : month) + "-" + (day < 10 ? "0" + day : day) + " " + time;
 	});
